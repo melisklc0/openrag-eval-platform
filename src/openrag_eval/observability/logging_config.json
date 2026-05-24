@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "formatters": {
+    "simple": {
+      "format": "[%(levelname)s]: %(message)s"
+    },
+    "detailed": {
+      "format": "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s",
+      "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+    },
+    "json": {
+      "()": "openrag_eval.observability.logger.CustomJSONFormatter",
+      "fmt_keys": {
+        "level": "levelname",
+        "message": "message",
+        "timestamp": "timestamp",
+        "logger": "name",
+        "module": "module",
+        "function": "funcName",
+        "line": "lineno",
+        "thread_name": "threadName"
+      },
+      "builtin_attrs": [
+        "args",
+        "asctime",
+        "created",
+        "exc_info",
+        "exc_text",
+        "filename",
+        "funcName",
+        "levelname",
+        "levelno",
+        "lineno",
+        "module",
+        "msecs",
+        "message",
+        "msg",
+        "name",
+        "pathname",
+        "process",
+        "processName",
+        "relativeCreated",
+        "stack_info",
+        "thread",
+        "threadName",
+        "taskName"
+      ]
+    }
+  },
+  "filters": {
+    "no_errors": {
+      "()": "openrag_eval.observability.logger.NonErrorFilter"
+    }
+  },
+  "handlers": {
+    "stdout": {
+      "class": "logging.StreamHandler",
+      "formatter": "simple",
+      "stream": "ext://sys.stdout",
+      "filters": ["no_errors"]
+    },
+    "stderr": {
+      "class": "logging.StreamHandler",
+      "formatter": "simple",
+      "stream": "ext://sys.stderr",
+      "level": "WARNING"
+    },
+    "file_json": {
+      "class": "logging.handlers.RotatingFileHandler",
+      "level": "DEBUG",
+      "formatter": "json",
+      "filename": "logs/openrag_eval.jsonl",
+      "maxBytes": 5242880,
+      "backupCount": 3,
+      "encoding": "utf-8"
+    },
+    "file_log": {
+      "class": "logging.handlers.RotatingFileHandler",
+      "formatter": "detailed",
+      "filename": "logs/openrag_eval.log",
+      "maxBytes": 5242880,
+      "backupCount": 3,
+      "encoding": "utf-8"
+    },
+    "queue_handler": {
+      "class": "openrag_eval.observability.logger.CustomQueueHandler",
+      "handlers": [
+        "stdout",
+        "stderr",
+        "file_json",
+        "file_log"
+      ],
+      "respect_handler_level": true
+    }
+  },
+  "loggers": {
+    "root": {
+      "level": "DEBUG",
+      "handlers": [
+        "queue_handler"
+      ]
+    },
+    "uvicorn": {
+      "level": "INFO",
+      "handlers": [],
+      "propagate": true
+    },
+    "uvicorn.error": {
+      "level": "INFO",
+      "handlers": [],
+      "propagate": true
+    },
+    "uvicorn.access": {
+      "level": "INFO",
+      "handlers": [],
+      "propagate": true
+    },
+    "uvicorn.asgi": {
+      "level": "INFO",
+      "handlers": [],
+      "propagate": true
+    },
+    "httpx": {
+      "level": "INFO",
+      "handlers": [],
+      "propagate": true
+    },
+    "urllib3": {
+      "level": "INFO",
+      "handlers": [],
+      "propagate": true
+    },
+    "qdrant_client": {
+      "level": "INFO",
+      "handlers": [],
+      "propagate": true
+    },
+    "langchain": {
+      "level": "INFO",
+      "handlers": [],
+      "propagate": true
+    },
+    "langfuse": {
+      "level": "INFO",
+      "handlers": [],
+      "propagate": true
+    }
+  }
+}
