@@ -1,0 +1,40 @@
+services:
+  openrag-eval-api:
+    build:
+      context: ../..
+      dockerfile: infra/api/Dockerfile
+    container_name: openrag_eval_api
+    # Read environment variables from the root .env file
+    env_file:
+      - path: ../../.env
+        required: false
+    # Tiny init process improves signal handling and zombie process cleanup.
+    init: true
+    ports:
+      - "${CORE_API_PORT:-8090}:8090"
+    # Read-only bind mount is convenient for local development without letting the container mutate source.
+    volumes:
+      - ../../src:/app/src:ro
+      - ../../logs:/app/logs:rw
+    environment:
+      UV_COMPILE_BYTECODE: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+    # Minimal hardening that stays low-friction for development.
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+    # Healthcheck ensures container is responsive before marking healthy, with retries and timeouts for robustness.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/health', timeout=3)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - openrag-eval-network
+
+networks:
+  openrag-eval-network:
+    name: openrag-eval-network

@@ -1,0 +1,6 @@
+include:
+  - path: infra/api/docker-compose.yml
+
+networks:
+  openrag-eval-network:
+    name: openrag-eval-network
